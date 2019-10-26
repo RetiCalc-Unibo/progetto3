@@ -8,7 +8,7 @@ Hiari:  Server Conta Parole<br>
 Endri:  tbd<br>
 Karina: tbd<br>
 Daniel: tbd<br>
-Andrei: tbd
+Andrei: Client e Server UDP (poi confrontiamo le versioni)
 <br>
 <b>Tip</b><br>
 Modificate il file README.md specificando cosa volete fare<br>
