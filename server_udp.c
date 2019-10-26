@@ -14,17 +14,18 @@
 
 // Struttura di una richiesta
 typedef struct {
-	char *file;
+	char file[MAX_STRING_LENGTH];
 } Request;
 
 int main(int argc, char *argv[]) {
-	int datagramSocket, portNumber, length, number, fd, longestWord;
 	const int on = 1;
+	int datagramSocket, portNumber, length, number, longestWord, currentWordCounter;
+	char c;
+	FILE *fp;
 	struct sockaddr_in cliaddr, servaddr;
 	struct hostent *clienthost;
 	Request *request = (Request*) malloc(sizeof(Request));
-	char *temp, line[MAX_STRING_LENGTH];
-
+	
 	// Controllo argomenti
 	if (argc != 2) {
 		printf("Errore. Utilizzo del programma: %s serverPort\n", argv[0]);
@@ -41,7 +42,7 @@ int main(int argc, char *argv[]) {
 		number++;
 	}
 
-	portNumber = atoi(argv[2]);
+	portNumber = atoi(argv[1]);
 
 	// Verifica porta
 	if (portNumber < 1024 || portNumber > 65535) {
@@ -91,23 +92,26 @@ int main(int argc, char *argv[]) {
 			printf("Operazione richiesta da: %s %i\n", clienthost->h_name, (unsigned)ntohs(cliaddr.sin_port));
 		}
 
-		longestWord = 0;
-		fd = open(request->file, O_RDONLY, 00640);
+		printf("Ricevuta la richiesta di aprire il file %s\n", request->file); // Qua c'è qualcosa che non va :D
 
-		if (fd < 0) {
+		longestWord = 0;
+		fp = fopen(request->file, "rt"); // rt = read text
+
+		if (fp == NULL) { // L'apertura del file non è riuscita
 			longestWord = -1;
 		} else {
-			while (fgets(line, MAX_STRING_LENGTH, fd)) {
-				temp = strtok(line, " ");
-				while (temp != NULL) {
-					if (strlen(temp) > longestWord) {
-						longestWord = strlen(temp);
-					}
+			while (c = fgetc(fp) != EOF) {
+				currentWordCounter = 0;
+				while (c != ' ' && c != '\n') {
+					currentWordCounter++;
 				}
-				temp = strtok(NULL, " ");
+
+				if (currentWordCounter > longestWord) {
+					longestWord = currentWordCounter;
+				}
 			}
 
-			close(fd);
+			fclose(fp);
 		}
 
 		longestWord = htonl(longestWord);

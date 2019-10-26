@@ -7,8 +7,6 @@
 #include <netdb.h>
 #include <string.h>
 
-#define LINE_LENGTH 256
-
 // Struttura di una richiesta
 typedef struct {
 	char *file;
@@ -85,7 +83,7 @@ int main(int argc, char *argv[]) {
 
 	printf("Inserire il nome di un file o EOF per terminare: ");
 
-	while (gets(&fileName) != EOF) {
+	while (gets(&fileName)) {
 		request.file = htonl(fileName);
 		
 		length = sizeof(servaddr);
