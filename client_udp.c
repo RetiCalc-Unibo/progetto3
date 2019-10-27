@@ -7,7 +7,7 @@
 #include <netdb.h>
 #include <string.h>
 
-//non sarebbe meglio controllare qual è la grandezza massima di un nome file?
+// Non sarebbe meglio controllare qual è la grandezza massima di un nome file?
 #define MAX_LENGTH 255
 
 // Struttura di una richiesta
@@ -18,7 +18,7 @@ typedef struct {
 int main(int argc, char *argv[]) {
 	struct hostent *host;
 	struct sockaddr_in clientaddr, servaddr;
-	int portNumber, datagramSocket, number, length, result, nameLength;
+	int portNumber, socketDescriptor, number, length, result, nameLength;
 	char fileName[MAX_LENGTH];
 	Request request;
 	
@@ -69,25 +69,23 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Creazione socket
-	datagramSocket = socket(AF_INET, SOCK_DGRAM, 0);
-	if (datagramSocket < 0) {
+	socketDescriptor = socket(AF_INET, SOCK_DGRAM, 0);
+	if (socketDescriptor < 0) {
 		perror("Apertura socket.");
 		exit(5);
 	}
-	printf("Creata la socket %d.\n", datagramSocket);
+	printf("Creata la socket %d.\n", socketDescriptor);
 
 	// Bind socket a una porta scelta dal sistema
-	if (bind(datagramSocket, (struct sockaddr*)&clientaddr, sizeof(clientaddr)) <0) {
+	if (bind(socketDescriptor, (struct sockaddr*)&clientaddr, sizeof(clientaddr)) <0) {
 		perror("Bind socket.");
 		exit(6);
 	}
-	printf("Bind socket riuscito alla porta %i\n", clientaddr.sin_port);
+	printf("Bind socket riuscito alla porta %i.\n", clientaddr.sin_port);
 
 	// Inizio del programma effettivo
 
-	
-
-	printf("Inserire il nome di un file o EOF per terminare: ");
+	printf("Inserire il nome di un file o EOF (CTRL + D) per terminare: ");
 
 	while (gets(fileName)) {
 		nameLength = strlen(fileName);
@@ -97,35 +95,35 @@ int main(int argc, char *argv[]) {
 			&& fileName[nameLength-2] == 'x'
 			&& fileName[nameLength-1] == 't') {
 
-			// copio l'array
+			// Copio l'array
 			memcpy(&(request.file), &fileName, sizeof(request.file));		
 
 			length = sizeof(servaddr);
-			if (sendto(datagramSocket, &request, sizeof(Request), 0, (struct sockaddr*)&servaddr, length) < 0) {
+			if (sendto(socketDescriptor, &request, sizeof(Request), 0, (struct sockaddr*)&servaddr, length) < 0) {
 				perror("Errore nella sendto.");
 				continue;
 			}
 
-			if (recvfrom(datagramSocket, &result, sizeof(result), 0, (struct sockaddr*)&servaddr, &length) < 0) {
+			if (recvfrom(socketDescriptor, &result, sizeof(result), 0, (struct sockaddr*)&servaddr, &length) < 0) {
 				perror("Errore nella recvfrom.");
 				continue;
 			}
 		
-			if((int)ntohl(result) > 0) {
+			if ((int)ntohl(result) > 0) {
 				printf("La parola piu' lunga nel file richiesto ha %i caratteri.\n", (int)ntohl(result));
-			} else if((int)ntohl(result) == 0){
-				printf("Nel file richiesto non ci sono parole\n");
+			} else if ((int)ntohl(result) == 0) {
+				printf("Nel file richiesto non ci sono parole.\n");
 			} else {
-				printf("Il file %s non esiste sul server\n", fileName);
+				printf("Il file %s non esiste sul server.\n", fileName);
 			}
 		} else {
-			printf("Il file inserito non è un file di testo (*.txt)\n");
+			printf("Il file inserito non è un file di testo (*.txt).\n");
 		}
 
-		printf("Inserire il nome di un file o EOF per terminare: ");
+		printf("Inserire il nome di un file o EOF (CTRL + D) per terminare: ");
 	}
 
-	close(datagramSocket);
-	printf("Il Client sta terminando...\n");  
+	close(socketDescriptor);
+	printf("E' stata richiesta la terminazione. Il Client sta terminando...\n"); 
 	exit(0);
 }

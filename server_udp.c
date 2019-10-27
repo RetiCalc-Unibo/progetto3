@@ -25,9 +25,6 @@ int main(int argc, char *argv[]) {
 	struct sockaddr_in cliaddr, servaddr;
 	struct hostent *clienthost;
 	Request request;
-
-	//variabili da cancellare di test
-	//int l = 0;
 	
 	// Controllo argomenti
 	if (argc != 2) {
@@ -95,13 +92,7 @@ int main(int argc, char *argv[]) {
 			printf("Operazione richiesta da: %s %i\n", clienthost->h_name, (unsigned)ntohs(cliaddr.sin_port));
 		}
 
-		/*test
-		for(l = 0; l < strlen(request.file); l++){
-			printf("%c", request.file[l]);
-		}*/
-
 		printf("Ricevuta la richiesta di aprire il file %s\n", request.file);
-
 
 		longestWord = 0;
 		fp = fopen(request.file, "rt"); // rt = read text
@@ -109,7 +100,7 @@ int main(int argc, char *argv[]) {
 		if (fp == NULL) { // L'apertura del file non è riuscita
 			longestWord = -1;
 		} else {
-			do{
+			do {
 				c = fgetc(fp);
 				currentWordCounter = 0;
 				while ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
@@ -120,7 +111,7 @@ int main(int argc, char *argv[]) {
 				if (currentWordCounter > longestWord) {
 					longestWord = currentWordCounter;
 				}
-			}while(c != EOF);
+			} while (c != EOF);
 
 			fclose(fp);
 		}
