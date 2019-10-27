@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
 			&& fileName[nameLength-1] == 't') {
 
 			// copio l'array
-			memcpy(&(request.file), &fileName, sizeof(&(request.file)));		
+			memcpy(&(request.file), &fileName, sizeof(request.file));		
 
 			length = sizeof(servaddr);
 			if (sendto(datagramSocket, &request, sizeof(Request), 0, (struct sockaddr*)&servaddr, length) < 0) {
