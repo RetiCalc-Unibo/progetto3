@@ -24,7 +24,10 @@ int main(int argc, char *argv[]) {
 	FILE *fp;
 	struct sockaddr_in cliaddr, servaddr;
 	struct hostent *clienthost;
-	Request *request = (Request*) malloc(sizeof(Request));
+	Request request;
+
+	//variabili da cancellare di test
+	//int l = 0;
 	
 	// Controllo argomenti
 	if (argc != 2) {
@@ -79,7 +82,7 @@ int main(int argc, char *argv[]) {
 	// Ciclo di ricezione richieste
 	for(;;) {
 		length = sizeof(struct sockaddr_in);
-		if (recvfrom(datagramSocket, request, sizeof(Request), 0, (struct sockaddr*)&cliaddr, &length) < 0) {
+		if (recvfrom(datagramSocket, &request, sizeof(Request), 0, (struct sockaddr*)&cliaddr, &length) < 0) {
 			perror("Errore nella recvfrom.");
 			continue;
 		}
@@ -92,24 +95,32 @@ int main(int argc, char *argv[]) {
 			printf("Operazione richiesta da: %s %i\n", clienthost->h_name, (unsigned)ntohs(cliaddr.sin_port));
 		}
 
-		printf("Ricevuta la richiesta di aprire il file %s\n", request->file);
+		/*test
+		for(l = 0; l < strlen(request.file); l++){
+			printf("%c", request.file[l]);
+		}*/
+
+		printf("Ricevuta la richiesta di aprire il file %s\n", request.file);
+
 
 		longestWord = 0;
-		fp = fopen(request->file, "rt"); // rt = read text
+		fp = fopen(request.file, "rt"); // rt = read text
 
 		if (fp == NULL) { // L'apertura del file non è riuscita
 			longestWord = -1;
 		} else {
-			while (c = fgetc(fp) != EOF) {
+			do{
+				c = fgetc(fp);
 				currentWordCounter = 0;
-				while (c != ' ' && c != '\n') {
+				while ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
 					currentWordCounter++;
+					c = fgetc(fp);
 				}
 
 				if (currentWordCounter > longestWord) {
 					longestWord = currentWordCounter;
 				}
-			}
+			}while(c != EOF);
 
 			fclose(fp);
 		}

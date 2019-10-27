@@ -7,16 +7,19 @@
 #include <netdb.h>
 #include <string.h>
 
+//non sarebbe meglio controllare qual è la grandezza massima di un nome file?
+#define MAX_LENGTH 255
+
 // Struttura di una richiesta
 typedef struct {
-	char *file;
+	char file[MAX_LENGTH];
 } Request;
 
 int main(int argc, char *argv[]) {
 	struct hostent *host;
 	struct sockaddr_in clientaddr, servaddr;
-	int portNumber, datagramSocket, number, length, result;
-	char *fileName;
+	int portNumber, datagramSocket, number, length, result, nameLength;
+	char fileName[MAX_LENGTH];
 	Request request;
 	
 	// Controllo argomenti in input
@@ -30,7 +33,7 @@ int main(int argc, char *argv[]) {
 	clientaddr.sin_family = AF_INET;
 	clientaddr.sin_addr.s_addr = INADDR_ANY;
 
-	// Passando 0 ci leghiamo ad un qualsiasi indirizzo libero
+	// Passando 0 ci leghiamo ad una qualsiasi porta libera
 	clientaddr.sin_port = 0;
 
 	memset((char *)&servaddr, 0, sizeof(struct sockaddr_in));
@@ -51,6 +54,7 @@ int main(int argc, char *argv[]) {
 	portNumber = atoi(argv[2]);
 
 	// Verifica porta e host
+	// NB: NON è un controllo da fare solo quando si crea la SOCKET nel SERVER?
 	if (portNumber < 1024 || portNumber > 65535) {
 		printf("La porta passata in input deve essere compresa tra 1024 e 65535.\n");
 		exit(3);
@@ -81,23 +85,43 @@ int main(int argc, char *argv[]) {
 
 	// Inizio del programma effettivo
 
+	
+
 	printf("Inserire il nome di un file o EOF per terminare: ");
 
-	while (gets(&fileName)) {
-		request.file = (fileName);
+	while (gets(fileName)) {
+		nameLength = strlen(fileName);
+		if(nameLength > 4
+			&& fileName[nameLength-4] == '.'
+			&& fileName[nameLength-3] == 't'
+			&& fileName[nameLength-2] == 'x'
+			&& fileName[nameLength-1] == 't') {
+
+			// copio l'array
+			memcpy(&(request.file), &fileName, sizeof(&(request.file)));		
+
+			length = sizeof(servaddr);
+			if (sendto(datagramSocket, &request, sizeof(Request), 0, (struct sockaddr*)&servaddr, length) < 0) {
+				perror("Errore nella sendto.");
+				continue;
+			}
+
+			if (recvfrom(datagramSocket, &result, sizeof(result), 0, (struct sockaddr*)&servaddr, &length) < 0) {
+				perror("Errore nella recvfrom.");
+				continue;
+			}
 		
-		length = sizeof(servaddr);
-		if (sendto(datagramSocket, &request, sizeof(Request), 0, (struct sockaddr*)&servaddr, length) < 0) {
-			perror("Errore nella sendto.");
-			continue;
+			if((int)ntohl(result) > 0) {
+				printf("La parola piu' lunga nel file richiesto ha %i caratteri.\n", (int)ntohl(result));
+			} else if((int)ntohl(result) == 0){
+				printf("Nel file richiesto non ci sono parole\n");
+			} else {
+				printf("Il file %s non esiste sul server\n", fileName);
+			}
+		} else {
+			printf("Il file inserito non è un file di testo (*.txt)\n");
 		}
 
-		if (recvfrom(datagramSocket, &result, sizeof(result), 0, (struct sockaddr*)&servaddr, &length) < 0) {
-			perror("Errore nella recvfrom.");
-			continue;
-		}
-	
-		printf("La parola piu' lunga nel file richiesto ha %i caratteri.\n", (int)ntohl(result));
 		printf("Inserire il nome di un file o EOF per terminare: ");
 	}
 
