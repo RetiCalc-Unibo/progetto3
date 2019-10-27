@@ -10,11 +10,11 @@
 #include <netdb.h>
 #include <string.h>
 
-#define MAX_STRING_LENGTH 255
+#define MAX_LENGTH 255
 
 // Struttura di una richiesta
 typedef struct {
-	char file[MAX_STRING_LENGTH];
+	char file[MAX_LENGTH];
 } Request;
 
 int main(int argc, char *argv[]) {
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
 			printf("Operazione richiesta da: %s %i\n", clienthost->h_name, (unsigned)ntohs(cliaddr.sin_port));
 		}
 
-		printf("Ricevuta la richiesta di aprire il file %s\n", request->file); // Qua c'è qualcosa che non va :D
+		printf("Ricevuta la richiesta di aprire il file %s\n", request->file);
 
 		longestWord = 0;
 		fp = fopen(request->file, "rt"); // rt = read text

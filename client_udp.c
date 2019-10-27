@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
 	printf("Inserire il nome di un file o EOF per terminare: ");
 
 	while (gets(&fileName)) {
-		request.file = htonl(fileName);
+		request.file = (fileName);
 		
 		length = sizeof(servaddr);
 		if (sendto(datagramSocket, &request, sizeof(Request), 0, (struct sockaddr*)&servaddr, length) < 0) {
