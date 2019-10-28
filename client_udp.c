@@ -7,8 +7,7 @@
 #include <netdb.h>
 #include <string.h>
 
-// Non sarebbe meglio controllare qual è la grandezza massima di un nome file?
-#define MAX_LENGTH 255
+#define MAX_LENGTH 256
 
 // Struttura di una richiesta
 typedef struct {
@@ -54,7 +53,6 @@ int main(int argc, char *argv[]) {
 	portNumber = atoi(argv[2]);
 
 	// Verifica porta e host
-	// NB: NON è un controllo da fare solo quando si crea la SOCKET nel SERVER?
 	if (portNumber < 1024 || portNumber > 65535) {
 		printf("La porta passata in input deve essere compresa tra 1024 e 65535.\n");
 		exit(3);

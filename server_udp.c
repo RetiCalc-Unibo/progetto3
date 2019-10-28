@@ -10,7 +10,7 @@
 #include <netdb.h>
 #include <string.h>
 
-#define MAX_LENGTH 255
+#define MAX_LENGTH 256
 
 // Struttura di una richiesta
 typedef struct {
