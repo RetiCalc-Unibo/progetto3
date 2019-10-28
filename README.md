@@ -5,9 +5,9 @@
 <br>
 <b>Divisione del Lavoro</b><br>
 Hiari:  Server Conta Parole<br>
-Endri:  tbd<br>
-Karina: tbd<br>
-Daniel: tbd<br>
+Endri:  Server TCP<br>
+Karina: Client TCP<br>
+Daniel: Presentazione e Gestione lavoro<br>
 Andrei: Client e Server UDP (poi confrontiamo le versioni)
 <br>
 <b>Tip</b><br>
