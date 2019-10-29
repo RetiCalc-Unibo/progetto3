@@ -69,15 +69,16 @@ int main(int argc, char * argv[]){
 		printf("Server TCP: Errore durante il binding\n");
 		exit(5);
 	}
-	printf("Server TCP: Binding della Socket effettuato\n");
+	printf("Server TCP: Binding della Socket effettuato\n\n");
 	
+	// La Socket si mette in attesa di un messaggio
+	result = listen(streamSocket, 5);
+	if(result < 0){
+		printf("Server TCP: Errore durante la listen\n");
+		exit(6);
+	}
+
 	while(1){
-		// La Socket si mette in attesa di un messaggio
-		result = listen(streamSocket, 5);
-		if(result < 0){
-			printf("Server TCP: Errore durante la listen\n");
-			exit(6);
-		}
 
 		// Accetto la richiesta in arrivo
 		newSocket = accept(streamSocket, (struct sockaddr *) &peerAddr, &peeraddrLen);
@@ -109,9 +110,12 @@ int main(int argc, char * argv[]){
 				if(c == '\n')
 					contaLinea++;
 			}
+			shutdown(newSocket, 0);
 			shutdown(newSocket, 1);
 			printf("Server TCP: Letto il file e cancellata la riga\n\n");
-			printf("Server TCP: In attesa di successive richieste\n");
+			//printf("Server TCP: In attesa di successive richieste\n");
+		} else {
+			close(newSocket);
 		}
 		
 	}
