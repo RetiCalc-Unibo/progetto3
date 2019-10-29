@@ -104,12 +104,13 @@ int main(int argc, char * argv[]){
 			printf("Server TCP: Ricevuta linea n.%d da cancellare\n", numLinea);
 
 			// Leggo il file
-			while(readSocket = read(newSocket, &c, sizeof(char)) > 0){
+			while((readSocket = read(newSocket, &c, sizeof(char))) > 0){
 				if(numLinea != contaLinea)
 					write(newSocket, &c, sizeof(char));
 				if(c == '\n')
 					contaLinea++;
 			}
+
 			shutdown(newSocket, 0);
 			shutdown(newSocket, 1);
 			printf("Server TCP: Letto il file e cancellata la riga\n\n");
