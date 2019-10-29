@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 		}
 		clienthost = gethostbyaddr((char *)&cliaddr.sin_addr, sizeof(cliaddr.sin_addr), AF_INET);
 		if (clienthost == NULL) 
-			printf("client host information not found"\n);
+			printf("client host information not found\n");
 		else {
 			printf("Operazione richiesta da: %s %i\n", clienthost->h_name, (unsigned)ntohs(cliaddr.sin_port));
 		}
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
 
 			longestWord = htonl(longestWord);
 			if (sendto(s, &longestWord, sizeof(longestWord), 0, (struct sockaddr*)&cliaddr, length) < 0) {
-				perror("PID %d: Sendto error ", getpid()); 
+				perror("Sendto error "); 
 				exit(1);
 			}
 
