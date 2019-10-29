@@ -26,10 +26,9 @@ e stampandolo a video.
 
 int main(int argc, char *argv[])
 {
-	int sd, port, fd_sorg, fd_dest, nread;
+	int sd, port, fd_sorg, fd_dest, nread, line;
 	FILE *fp;
 	char buff[DIM_BUFF];
-	unsigned int line;
 	int okToContinue, countLine = 0;
 	// FILENAME_MAX: lunghezza massima nome file. Costante di sistema.
 	char nome_sorg[FILENAME_MAX+1], nome_dest[FILENAME_MAX+1];
@@ -66,11 +65,11 @@ int main(int argc, char *argv[])
 	/* VERIFICA PORT e HOST */
 	if(port < 1024 || port > 65535){
 		printf("Client TCP: %s = porta scorretta...\n", argv[2]);
-		exit(2);
+		exit(3);
 	}
 	if(host == NULL){
 		printf("Client TCP: %s not found in /etc/hosts\n", argv[1]);
-		exit(2);
+		exit(4);
 	} else {
 		servaddr.sin_addr.s_addr = ((struct in_addr *)(host->h_addr)) -> s_addr;
 		servaddr.sin_port = htons(port);
@@ -81,11 +80,6 @@ int main(int argc, char *argv[])
 	printf("Client TCP: Ciclo di richieste di eliminazione riga fino a EOF\n\n");
 	printf("Client TCP: Nome del file, EOF per terminare: ");
 
-	/* ATTENZIONE!!
-	* Cosa accade se la riga e' piu' lunga di FILENAME_MAX-1?
-	* Stesso dicasi per le altre gets...
-	* Come si potrebbe risolvere il problema?
-	*/
 	while (gets(nome_sorg)) {
 		
 		/* Verifico l'esistenza del file */
@@ -94,73 +88,66 @@ int main(int argc, char *argv[])
 			printf("\nClient TCP: Nome del file, EOF per terminare: ");
 			continue;
 		}
-		
-		printf("Client TCP: Inserire numero di riga da eliminare: ");
 
-		//Fare o non fare scanf?
-		//SI vedrà, per le righe occorre usare un intero 
-		//positivo (unsigned int)
-		//
-		//scanf di un unsigned int: %u
-
-		//occorre inoltre effettuare un controllo su line, riga fornita in input
-		//
-		//per farlo sfrutto una variabile, okToContinue, che inizialmente vale 0
-		//e diventa 1 soltanto se le seguenti condizioni sono entrambe valide:
-		//-Il numero di riga è ben formattato
-		//-Se il numero delle righe del file è minore della linea fornita come parametro
-		//
-		//il ciclo while finisce solo se okToContinue è 1.
-		//
+		okToContinue = 0;
 		while (!okToContinue){
-			if (scanf("%u", &line) != 1){
+			printf("Client TCP: Inserire numero di riga da eliminare: ");
+			
+			if (scanf("%d", &line) != 1){
 				printf("Client TCP: Numero linea mal formattato\n");
 				while(getchar() != '\n');
-				printf("Client TCP: Inserire numero di riga da eliminare: ");
 				continue;
 			}
 			getchar();
-	 		// Extract characters from file and store in character c
-	 		fp = fopen(nome_sorg, "r");
+	 		
+			fp = fopen(nome_sorg, "r");
 		    	for (c = getc(fp); c != EOF; c = getc(fp)) 
-				if (c == '\n') // Increment count if this character is newline 
+				if (c == '\n')
 			    		countLine++; 
-		  
-		    	// Close the file 
+		   
 		    	fclose(fp); 
 
 		    	if (countLine < line){
 		    		printf("Client TCP: Numero righe del file minore della riga richiesta\n");
-		    		printf("Client TCP: Inserire numero di riga da eliminare: ");
 		    		continue;
-		    	}
+		    	} else if(line < 1){
+				printf("Client TCP: Il numero di riga deve essere positivo\n");
+		    		continue;
+			}
 
 		    	okToContinue = 1;
 		}
+		
+		okToContinue = 0;
 
-		printf("Client TCP: Inserisci nome del file destinazione: ");
-		if (gets(nome_dest) == 0)
-			break;
-
-		/*Verifico creazione file*/
-		while((fd_dest = open(nome_dest, O_WRONLY | O_CREAT, 0644)) < 0){
-			perror("Client TCP: File destinazione");
+		while(!okToContinue){
 			printf("Client TCP: Inserisci nome del file destinazione: ");
+			if (gets(nome_dest) == 0){
+				printf("Client TCP: Errore lettura nome del file di destinazione\n");
+				continue;
+			}
+			okToContinue = 1;
+		}
+		
+		/*Verifico creazione file*/
+		if((fd_dest = open(nome_dest, O_WRONLY | O_CREAT, 0644)) < 0){
+			perror("Client TCP: File destinazione");
+			exit(5);
 		}
 
 		/* CREAZIONE SOCKET ------------------------------------ */
 		sd = socket(AF_INET, SOCK_STREAM, 0);
 		if (sd < 0) {
 			perror("Client TCP: Apertura socket");
-			exit(1);
+			exit(6);
 		}
 		
 		printf("\nClient TCP: Creata la socket sd=%d\n", sd);
 
 		/* Operazione di BIND implicita nella connect */
-		if(connect(sd,(struct sockaddr *) &servaddr, sizeof(struct sockaddr))<0){
+		if(connect(sd,(struct sockaddr *) &servaddr, sizeof(struct sockaddr)) < 0){
 			perror("connect"); 
-			exit(1);
+			exit(7);
 		}
 		printf("Client TCP: Connessione effettuata\n");
 
@@ -171,7 +158,7 @@ int main(int argc, char *argv[])
 
 		/*INVIO File*/
 		while((nread = read(fd_sorg, buff, DIM_BUFF)) > 0){
-			write(1,buff,nread);	//stampa
+			//write(1,buff,nread);	//stampa
 			write(sd,buff,nread);	//invio
 		}
 		/* Chiusura socket in spedizione -> invio dell'EOF */
@@ -191,8 +178,8 @@ int main(int argc, char *argv[])
 		close(fd_dest);
 		close(sd);
 
-		printf("Client TCP: Nome del file da ordinare, EOF per terminare: ");
+		printf("Client TCP: Nome del file, EOF per terminare: ");
 	} //while
 	printf("\nClient TCP: termino...\n");
-	exit(0);
+	exit(8);
 }

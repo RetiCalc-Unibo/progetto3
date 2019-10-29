@@ -84,20 +84,20 @@ int main(int argc, char * argv[]){
 		newSocket = accept(streamSocket, (struct sockaddr *) &peerAddr, &peeraddrLen);
 		if(newSocket < 0){
 			printf("Server TCP: Errore nella accept\n");
-			exit(8);
+			exit(7);
 		}
 
 		pid = fork();
 		if(pid < 0){
 			perror("fork");
-			exit(10);
+			exit(8);
 		} else if(pid == 0){
 			close(streamSocket);
 			printf("Server TCP: Accettata connessione con il Peer\n");
 
 			// Leggo il numero di riga da cancellare
 			if(readSocket = read(newSocket, &numLinea, sizeof(int)) < 0){
-				perror("linea");
+				perror("Server TCP: Linea");
 				printf("Server TCP: Errore nella lettura della linea\n");
 				exit(9);
 			}
@@ -113,7 +113,7 @@ int main(int argc, char * argv[]){
 			shutdown(newSocket, 0);
 			shutdown(newSocket, 1);
 			printf("Server TCP: Letto il file e cancellata la riga\n\n");
-			//printf("Server TCP: In attesa di successive richieste\n");
+			exit(0);
 		} else {
 			close(newSocket);
 		}
