@@ -92,12 +92,13 @@ int main(int argc, char *argv[]) {
 		}
 
 		longestWord = -1;
+		counter = 0;
 
 		pid = fork();
 
 		if (pid == 0){
 
-			printf("PID %d:Ricevuta richiesta operazione su file: %s\n", getpid(), request.file);
+			printf("PID %d: ricevuta richiesta operazione su file: %s\n", getpid(), request.file);
 			
 			fp = fopen(request.file, "rt");
 
@@ -112,6 +113,8 @@ int main(int argc, char *argv[]) {
 						continue;
 					}
 					else counter++;	
+
+					printf("%d\n", counter);
 				}
 
 				fclose(fp);
