@@ -110,7 +110,6 @@ int main(int argc, char *argv[]) {
 						if(counter > longestWord)
 							longestWord = counter;
 						counter = 0; 
-						continue;
 					}
 					else counter++;	
 				}
