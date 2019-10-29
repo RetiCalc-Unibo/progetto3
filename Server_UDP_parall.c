@@ -113,8 +113,6 @@ int main(int argc, char *argv[]) {
 						continue;
 					}
 					else counter++;	
-
-					printf("%d\n", counter);
 				}
 
 				fclose(fp);
