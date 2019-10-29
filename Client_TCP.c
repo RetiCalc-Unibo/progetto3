@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 
 
 	/* CONTROLLO ARGOMENTI ---------------------------------- */
-	if(argc !=3 ){
+	if(argc !=3){
 		printf("Error:%s serverAddress serverPort\n", argv[0]);
 		exit(1);
 	}
@@ -52,8 +52,8 @@ int main(int argc, char *argv[])
 	/*VERIFICA INTERO*/
 	nread = 0;
 
-	while ( argv[2][nread] != '\0' ){
-		if ( (argv[2][nread] < '0') || (argv[2][nread] > '9') ){
+	while(argv[2][nread] != '\0'){
+		if((argv[2][nread] < '0') || (argv[2][nread] > '9')){
 			printf("Secondo argomento non intero\n");
 			exit(2);
 		}
@@ -64,14 +64,14 @@ int main(int argc, char *argv[])
 	port = atoi(argv[2]);
 
 	/* VERIFICA PORT e HOST */
-	if (port < 1024 || port > 65535){
+	if(port < 1024 || port > 65535){
 		printf("%s = porta scorretta...\n", argv[2]);
 		exit(2);
 	}
-	if (host == NULL){
+	if(host == NULL){
 		printf("%s not found in /etc/hosts\n", argv[1]);
 		exit(2);
-	}else{
+	} else {
 		servaddr.sin_addr.s_addr = ((struct in_addr *)(host->h_addr)) -> s_addr;
 		servaddr.sin_port = htons(port);
 	}
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 	* Come si potrebbe risolvere il problema?
 	*/
 	while (gets(nome_sorg)) {
-		printf("File da aprire: __%s__\n", nome_sorg);
+		printf("File da aprire: %s\n", nome_sorg);
 
 		/* Verifico l'esistenza del file */
 		if ((fd_sorg = open(nome_sorg, O_RDONLY)) < 0){
@@ -119,9 +119,9 @@ int main(int argc, char *argv[])
 				printf("Inserire numero di riga da eliminare\n");
 				continue;
 			}
-
-	 		// Extract characters from file and store in character c 
-	 		fp = fopen(nome_sorg, O_RDONLY);
+			getchar();
+	 		// Extract characters from file and store in character c
+	 		fp = fopen(nome_sorg, "r");
 	    	for (c = getc(fp); c != EOF; c = getc(fp)) 
 	        	if (c == '\n') // Increment count if this character is newline 
 	            	countLine++; 
@@ -136,13 +136,11 @@ int main(int argc, char *argv[])
 	    	}
 
 	    	okToContinue = 1;
-
-
 		}
 
-
-		printf("Nome del file senza la riga %u:\n ", line);
-		if (gets(nome_dest) == 0) break;
+		printf("Inserisci nome del nuovo file: ");
+		if (gets(nome_dest) == 0)
+			break;
 
 		/*Verifico creazione file*/
 		if ((fd_dest = open(nome_dest, O_WRONLY | O_CREAT, 0644)) < 0){
