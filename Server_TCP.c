@@ -11,6 +11,10 @@
 #include <string.h>
 #include <ctype.h>
 
+#include <time.h>
+
+#define DIM_BUFF 4096
+
 int main(int argc, char * argv[]){
 
 	int pid;
@@ -25,6 +29,11 @@ int main(int argc, char * argv[]){
 	int peeraddrLen;
 	struct sockaddr_in servAddr, peerAddr;
 	
+	char buff[DIM_BUFF];
+
+	clock_t start, diff_time;
+	int msec;
+
 	// Controllo Argomenti
 	if(argc == 1){
 		// Se la porta non è passata in argomento, selezioniamo la porta 1050
@@ -103,13 +112,38 @@ int main(int argc, char * argv[]){
 			}
 			printf("Server TCP: Ricevuta linea n.%d da cancellare\n", numLinea);
 
+
+			start = clock();
 			// Leggo il file
-			while((readSocket = read(newSocket, &c, sizeof(char))) > 0){
+			// Algoritmo con lettura carattere per carattere
+			/*while((readSocket = read(newSocket, &c, sizeof(char))) > 0){
+				//write(1, &c, sizeof(char));
 				if(numLinea != contaLinea)
 					write(newSocket, &c, sizeof(char));
 				if(c == '\n')
 					contaLinea++;
+			}*/
+
+			// Algoritmo con lettura buffer 256 caratteri	
+			while((readSocket = read(newSocket, &buff, DIM_BUFF)) > 0){
+				
+				i = 0;
+				while(i < readSocket){
+					if(numLinea != contaLinea){
+						write(newSocket, &(buff[i]), sizeof(char));
+					} else while(buff[i] != '\n' && i < readSocket) i++;
+					
+					if(buff[i] == '\n') {
+						contaLinea++;
+					}
+					i++;
+				}
+				
 			}
+			diff_time = clock() - start;
+			msec = diff_time * 1000 / CLOCKS_PER_SEC;
+
+			printf("Tempo impiegato: %d millisecondi\n", msec%1000);
 
 			shutdown(newSocket, 0);
 			shutdown(newSocket, 1);
