@@ -91,8 +91,6 @@ int main(int argc, char *argv[]) {
 
 	// Inizio del programma effettivo
 
-	start = clock();
-
 	nameLength = strlen(fileName);
 	if(nameLength > 4
 		&& fileName[nameLength-4] == '.'
@@ -102,11 +100,12 @@ int main(int argc, char *argv[]) {
 
 		// copio l'array
 		memcpy(&(request.file), &fileName, sizeof(request.file));	
+		
 		length = sizeof(servaddr);
 
-	
+		start = clock();
 
-		for(nreq = 0; nreq < 4; nreq++){
+		for(nreq = 0; nreq < 20; nreq++){
 
 			if (sendto(datagramSocket, &request, sizeof(Request), 0, (struct sockaddr*)&servaddr, length) < 0) {
 				perror("Errore nella sendto.");
@@ -131,9 +130,9 @@ int main(int argc, char *argv[]) {
 		printf("Il file inserito non è un file di testo (*.txt)\n");
 	}
 
-	diff_time = clock() - start;
+	//diff_time = clock() - start;
 
-	sec=((double)diff_time)/ CLOCKS_PER_SEC;
+	sec = ((double)(clock() - start)) / CLOCKS_PER_SEC;
 
 	printf("Tempo impiegato per 300 richieste: %f secondi\n", sec);
 
