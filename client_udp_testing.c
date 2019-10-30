@@ -6,6 +6,8 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <string.h>
+#include <time.h>
+
 
 //non sarebbe meglio controllare qual è la grandezza massima di un nome file?
 #define MAX_LENGTH 255
@@ -18,9 +20,11 @@ typedef struct {
 int main(int argc, char *argv[]) {
 	struct hostent *host;
 	struct sockaddr_in clientaddr, servaddr;
-	int portNumber, datagramSocket, number, length, result, nameLength;
+	int portNumber, datagramSocket, number, length, result, nameLength,nreq;
 	char fileName[MAX_LENGTH];
 	Request request;
+	clock_t start,diff_time;
+	double sec;
 	
 	strcpy(fileName, argv[3]);
 
@@ -87,6 +91,7 @@ int main(int argc, char *argv[]) {
 
 	// Inizio del programma effettivo
 
+	start = clock();
 
 	nameLength = strlen(fileName);
 	if(nameLength > 4
@@ -96,26 +101,41 @@ int main(int argc, char *argv[]) {
 		&& fileName[nameLength-1] == 't') {
 
 		// copio l'array
-		memcpy(&(request.file), &fileName, sizeof(request.file));		
+		memcpy(&(request.file), &fileName, sizeof(request.file));	
 		length = sizeof(servaddr);
-		if (sendto(datagramSocket, &request, sizeof(Request), 0, (struct sockaddr*)&servaddr, length) < 0) {
-			perror("Errore nella sendto.");
-		}
-			if (recvfrom(datagramSocket, &result, sizeof(result), 0, (struct sockaddr*)&servaddr, &length) < 0) {
-			perror("Errore nella recvfrom.");
-		}
+
 	
-		if((int)ntohl(result) > 0) {
-			printf("La parola piu' lunga nel file richiesto ha %i caratteri.\n", (int)ntohl(result));
-		} else if((int)ntohl(result) == 0){
-			printf("Nel file richiesto non ci sono parole\n");
-		} else {
-			printf("Il file %s non esiste sul server\n", fileName);
+
+		for(nreq = 0; nreq < 4; nreq++){
+
+			if (sendto(datagramSocket, &request, sizeof(Request), 0, (struct sockaddr*)&servaddr, length) < 0) {
+				perror("Errore nella sendto.");
+			}
+			if (recvfrom(datagramSocket, &result, sizeof(result), 0, (struct sockaddr*)&servaddr, &length) < 0) {
+				perror("Errore nella recvfrom.");
+			}
+		
+			if((int)ntohl(result) > 0) {
+				//printf("La parola piu' lunga nel file richiesto ha %i caratteri.\n", (int)ntohl(result));
+			} else if((int)ntohl(result) == 0){
+				printf("Nel file richiesto non ci sono parole\n");
+			} else {
+				printf("Il file %s non esiste sul server\n", fileName);
+			}
+
+		printf("N° richiesta: %d\n", nreq);
+
 		}
+
 	} else {
 		printf("Il file inserito non è un file di testo (*.txt)\n");
 	}
 
+	diff_time = clock() - start;
+
+	sec=((double)diff_time)/ CLOCKS_PER_SEC;
+
+	printf("Tempo impiegato per 300 richieste: %f secondi\n", sec);
 
 	close(datagramSocket);
 	printf("Il Client sta terminando...\n");  

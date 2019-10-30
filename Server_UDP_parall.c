@@ -10,6 +10,7 @@
 #include <netdb.h>
 #include <string.h>
 
+
 #define MAX_LENGTH 256
 
 // Struttura di una richiesta
@@ -19,13 +20,13 @@ typedef struct {
 
 int main(int argc, char *argv[]) {
 	const int on = 1;
-	int s, port, length, n, longestWord, counter, pid;
+	int s, port, length, n, longestWord, counter, pid,nreq;
 	char c;
 	FILE *fp;
 	struct sockaddr_in cliaddr, servaddr;
 	struct hostent *clienthost;
 	Request request;
-	
+
 	// Controllo argomenti
 	if (argc != 2) {
 		printf("Usage: %s port\n", argv[0]);
@@ -93,7 +94,6 @@ int main(int argc, char *argv[]) {
 
 		longestWord = -1;
 		counter = 0;
-
 		pid = fork();
 
 		if (pid == 0){
@@ -126,7 +126,6 @@ int main(int argc, char *argv[]) {
 			printf("PID %d: operazione conclusa con successo\n",getpid() );
 			exit(0);
 		}
-
-		//controllo torna a padre
+		
 	}
 }

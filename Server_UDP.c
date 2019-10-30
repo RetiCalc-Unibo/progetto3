@@ -19,13 +19,13 @@ typedef struct {
 
 int main(int argc, char *argv[]) {
 	const int on = 1;
-	int datagramSocket, portNumber, length, number, longestWord, currentWordCounter;
+	int datagramSocket, portNumber, length, number, longestWord, counter, nreq;
 	char c;
 	FILE *fp;
 	struct sockaddr_in cliaddr, servaddr;
 	struct hostent *clienthost;
 	Request request;
-	
+
 	// Controllo argomenti
 	if (argc != 2) {
 		printf("Errore. Utilizzo del programma: %s serverPort\n", argv[0]);
@@ -78,6 +78,7 @@ int main(int argc, char *argv[]) {
 
 	// Ciclo di ricezione richieste
 	for(;;) {
+
 		length = sizeof(struct sockaddr_in);
 		if (recvfrom(datagramSocket, &request, sizeof(Request), 0, (struct sockaddr*)&cliaddr, &length) < 0) {
 			perror("Errore nella recvfrom.");
@@ -94,24 +95,21 @@ int main(int argc, char *argv[]) {
 
 		printf("Ricevuta la richiesta di aprire il file %s\n", request.file);
 
-		longestWord = 0;
+		longestWord = -1;
+		counter = 0;
 		fp = fopen(request.file, "rt"); // rt = read text
 
-		if (fp == NULL) { // L'apertura del file non è riuscita
-			longestWord = -1;
-		} else {
-			do {
-				c = fgetc(fp);
-				currentWordCounter = 0;
-				while ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
-					currentWordCounter++;
-					c = fgetc(fp);
+		if (fp != NULL) { // Apertura ok
+				
+			while((c = fgetc(fp))!= EOF) {
+			
+				if(!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))){
+					if(counter > longestWord)
+						longestWord = counter;
+					counter = 0; 
 				}
-
-				if (currentWordCounter > longestWord) {
-					longestWord = currentWordCounter;
-				}
-			} while (c != EOF);
+				else counter++;	
+			}
 
 			fclose(fp);
 		}
