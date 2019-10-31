@@ -69,14 +69,14 @@ int main(int argc, char *argv[]) {
 	// Creazione socket
 	socketDescriptor = socket(AF_INET, SOCK_DGRAM, 0);
 	if (socketDescriptor < 0) {
-		perror("Apertura socket.");
+		perror("Apertura socket");
 		exit(5);
 	}
 	printf("Creata la socket %d.\n", socketDescriptor);
 
 	// Bind socket a una porta scelta dal sistema
 	if (bind(socketDescriptor, (struct sockaddr*)&clientaddr, sizeof(clientaddr)) <0) {
-		perror("Bind socket.");
+		perror("Bind socket");
 		exit(6);
 	}
 	printf("Bind socket riuscito alla porta %i.\n", clientaddr.sin_port);
@@ -98,12 +98,12 @@ int main(int argc, char *argv[]) {
 
 			length = sizeof(servaddr);
 			if (sendto(socketDescriptor, &request, sizeof(Request), 0, (struct sockaddr*)&servaddr, length) < 0) {
-				perror("Errore nella sendto.");
+				perror("Errore nella sendto");
 				continue;
 			}
 
 			if (recvfrom(socketDescriptor, &result, sizeof(result), 0, (struct sockaddr*)&servaddr, &length) < 0) {
-				perror("Errore nella recvfrom.");
+				perror("Errore nella recvfrom");
 				continue;
 			}
 		

@@ -60,19 +60,19 @@ int main(int argc, char *argv[]) {
 	// Creazione, settaggio opzioni e connessione socket
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 	if (s < 0) {
-		perror("Creazione socket error ");
+		perror("Creazione socket error");
 		exit(4);
 	}
 	printf("Server: creata la socket %d.\n", s);
 
 	if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
-		perror("set opzioni socket ");
+		perror("Set opzioni socket");
 		exit(5);
 	}
 	printf("Server: set opzioni socket ok\n");
 
 	if (bind(s, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0) {
-		perror("Bind socket error ");
+		perror("Bind socket error");
 		exit(6);
 	}
 	printf("Server: bind socket ok.\n");
@@ -96,22 +96,22 @@ int main(int argc, char *argv[]) {
 		counter = 0;
 		pid = fork();
 
-		if (pid == 0){
-
+		if (pid == 0) {
 			printf("PID %d: ricevuta richiesta operazione su file: %s\n", getpid(), request.file);
 			
 			fp = fopen(request.file, "rt");
 
 			if (fp != NULL) { // Apertura ok
-				
-				while((c = fgetc(fp))!= EOF) {
-				
-					if(!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))){
-						if(counter > longestWord)
+				while ((c = fgetc(fp))!= EOF) {
+					if(!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))) {
+						if (counter > longestWord) {
 							longestWord = counter;
+						}
 						counter = 0; 
 					}
-					else counter++;	
+					else {
+						counter++;
+					}	
 				}
 
 				fclose(fp);
@@ -123,9 +123,8 @@ int main(int argc, char *argv[]) {
 				exit(1);
 			}
 
-			printf("PID %d: operazione conclusa con successo\n",getpid() );
+			printf("PID %d: operazione conclusa con successo\n", getpid());
 			exit(0);
 		}
-		
 	}
 }

@@ -1,17 +1,12 @@
 /* Client per richiedere l'ordinamento remoto di un file */
 
-/*Il Client chiede all’utente il nome del file
-e il numero della linea da eliminare.
+// Il Client chiede all’utente il nome del file e il numero della linea da eliminare,
 
-Dopodichè invia i dati al server e riceve
-il nuovo contenuto del file, inserendolo nel file system
-e stampandolo a video.
-*/
+// Dopodichè invia i dati al server e riceve il nuovo contenuto del file, inserendolo
+// nel file system e stampandolo a video.
 
+// Parametri da ricevere nella argv: eseg serverAddress serverPort
 
-//parametri da ricevere nella argv:
-//eseg serverAddress serverPort
-//
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,8 +19,7 @@ e stampandolo a video.
 
 #define DIM_BUFF 256
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 	int sd, port, fd_sorg, fd_dest, nread, line;
 	FILE *fp;
 	char buff[DIM_BUFF];
@@ -36,38 +30,35 @@ int main(int argc, char *argv[])
 	struct hostent *host;
 	struct sockaddr_in servaddr;
 
-
-	/* CONTROLLO ARGOMENTI ---------------------------------- */
-	if(argc !=3){
+	// Controllo argomenti
+	if (argc != 3) {
 		printf("Client TCP: Error:%s serverAddress serverPort\n", argv[0]);
 		exit(1);
 	}
 
-	/* INIZIALIZZAZIONE INDIRIZZO SERVER -------------------------- */
-	memset ((char *) &servaddr, 0, sizeof(struct sockaddr_in));
+	// Inizializzazione indirizzo server
+	memset((char *)&servaddr, 0, sizeof(struct sockaddr_in));
 	servaddr.sin_family = AF_INET;
 	host = gethostbyname(argv[1]);
 
-	/*VERIFICA INTERO*/
 	nread = 0;
 
-	while(argv[2][nread] != '\0'){
-		if((argv[2][nread] < '0') || (argv[2][nread] > '9')){
+	while (argv[2][nread] != '\0') {
+		if ((argv[2][nread] < '0') || (argv[2][nread] > '9')) {
 			printf("Client TCP: Secondo argomento non intero\n");
 			exit(2);
 		}
-
 		nread++;
 	}
 
 	port = atoi(argv[2]);
 
-	/* VERIFICA PORT e HOST */
-	if(port < 1024 || port > 65535){
+	// Verifica port e host
+	if (port < 1024 || port > 65535) {
 		printf("Client TCP: %s = porta scorretta...\n", argv[2]);
 		exit(3);
 	}
-	if(host == NULL){
+	if (host == NULL) {
 		printf("Client TCP: %s not found in /etc/hosts\n", argv[1]);
 		exit(4);
 	} else {
@@ -75,67 +66,68 @@ int main(int argc, char *argv[])
 		servaddr.sin_port = htons(port);
 	}
 
-	/* CORPO DEL CLIENT:
-	ciclo di accettazione di richieste da utente ------- */
+	// Corpo del Client: ciclo di accettazione di richieste da utente
 	printf("Client TCP: Ciclo di richieste di eliminazione riga fino a EOF\n\n");
 	printf("Client TCP: Nome del file, EOF per terminare: ");
 
 	while (gets(nome_sorg)) {
-		
 		/* Verifico l'esistenza del file */
-		if ((fd_sorg = open(nome_sorg, O_RDONLY)) < 0){
+		if ((fd_sorg = open(nome_sorg, O_RDONLY)) < 0) {
 			perror("Client TCP: File sorgente"); 
 			printf("\nClient TCP: Nome del file, EOF per terminare: ");
 			continue;
 		}
 
 		okToContinue = 0;
-		while (!okToContinue){
+		while (!okToContinue) {
 			printf("Client TCP: Inserire numero di riga da eliminare: ");
 			
-			if (scanf("%d", &line) != 1){
+			if (scanf("%d", &line) != 1) {
 				printf("Client TCP: Numero linea mal formattato\n");
-				while(getchar() != '\n');
+				while (getchar() != '\n');
 				continue;
 			}
 			getchar();
 	 		
 			fp = fopen(nome_sorg, "r");
-		    	for (c = getc(fp); c != EOF; c = getc(fp)) 
-				if (c == '\n')
-			    		countLine++; 
+		    	for (c = getc(fp); c != EOF; c = getc(fp)) {
+					if (c == '\n') {
+			    		countLine++;
+					}
+				} 
 		   
 		    	fclose(fp); 
 
-		    	if (countLine < line){
+		    	if (countLine < line) {
 		    		printf("Client TCP: Numero righe del file minore della riga richiesta\n");
 		    		continue;
-		    	} else if(line < 1){
+		    	}
+				else if (line < 1) {
 				printf("Client TCP: Il numero di riga deve essere positivo\n");
-		    		continue;
+		    	continue;
 			}
 
-		    	okToContinue = 1;
+		    okToContinue = 1;
 		}
 		
 		okToContinue = 0;
 
-		while(!okToContinue){
+		while (!okToContinue) {
 			printf("Client TCP: Inserisci nome del file destinazione: ");
-			if (gets(nome_dest) == 0){
+			if (gets(nome_dest) == 0) {
 				printf("Client TCP: Errore lettura nome del file di destinazione\n");
 				continue;
 			}
 			okToContinue = 1;
 		}
 		
-		/*Verifico creazione file*/
-		if((fd_dest = open(nome_dest, O_WRONLY | O_CREAT, 0644)) < 0){
+		// Verifico creazione file
+		if ((fd_dest = open(nome_dest, O_WRONLY | O_CREAT, 0644)) < 0) {
 			perror("Client TCP: File destinazione");
 			exit(5);
 		}
 
-		/* CREAZIONE SOCKET ------------------------------------ */
+		// Creazione socket
 		sd = socket(AF_INET, SOCK_STREAM, 0);
 		if (sd < 0) {
 			perror("Client TCP: Apertura socket");
@@ -144,42 +136,41 @@ int main(int argc, char *argv[])
 		
 		printf("\nClient TCP: Creata la socket sd=%d\n", sd);
 
-		/* Operazione di BIND implicita nella connect */
-		if(connect(sd,(struct sockaddr *) &servaddr, sizeof(struct sockaddr)) < 0){
-			perror("connect"); 
+		// Operazione di BIND implicita nella connect
+		if (connect(sd, (struct sockaddr *)&servaddr, sizeof(struct sockaddr)) < 0) {
+			perror("Connect"); 
 			exit(7);
 		}
+
 		printf("Client TCP: Connessione effettuata\n");
 
-
-		//Invio del numero della linea da eliminare
+		// Invio del numero della linea da eliminare
 		write(sd, &line, sizeof(int));
 
-
-		/*INVIO File*/
-		while((nread = read(fd_sorg, buff, DIM_BUFF)) > 0){
-			//write(1,buff,nread);	//stampa
-			write(sd,buff,nread);	//invio
+		// Invio file
+		while ((nread = read(fd_sorg, buff, DIM_BUFF)) > 0) {
+			write(sd,buff,nread);
 		}
-		/* Chiusura socket in spedizione -> invio dell'EOF */
 		shutdown(sd,1);
 
-		/*RICEZIONE File*/
+		// Ricezione file
 		printf("Client TCP: Ricevo e stampo file senza riga\n---------------\n");
-		while((nread = read(sd,buff,DIM_BUFF)) > 0){
+		while ((nread = read(sd, buff, DIM_BUFF)) > 0) {
 			write(fd_dest,buff,nread);
 			write(1,buff,nread);
 		}
+		
 		printf("---------------\nClient TCP: Trasferimento terminato\n\n");
-		/* Chiusura socket in ricezione */
+		// Chiusura socket in ricezione
 		shutdown(sd, 0);
-		/* Chiusura file */
+		// Chiusura file
 		close(fd_sorg);
 		close(fd_dest);
 		close(sd);
 
 		printf("Client TCP: Nome del file, EOF per terminare: ");
-	} //while
+	}
+
 	printf("\nClient TCP: termino...\n");
 	exit(8);
 }
