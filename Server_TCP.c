@@ -11,8 +11,6 @@
 #include <string.h>
 #include <ctype.h>
 
-#include <time.h>
-
 #define DIM_BUFF 4096
 
 int main(int argc, char * argv[]){
@@ -30,9 +28,6 @@ int main(int argc, char * argv[]){
 	struct sockaddr_in servAddr, peerAddr;
 	
 	char buff[DIM_BUFF];
-
-	clock_t start, diff_time;
-	int msec;
 
 	// Controllo Argomenti
 	if(argc == 1){
@@ -111,9 +106,6 @@ int main(int argc, char * argv[]){
 				exit(9);
 			}
 			printf("Server TCP: Ricevuta linea n.%d da cancellare\n", numLinea);
-
-
-			start = clock();
 			// Leggo il file
 			// Algoritmo con lettura carattere per carattere
 			/*while((readSocket = read(newSocket, &c, sizeof(char))) > 0){
@@ -140,11 +132,6 @@ int main(int argc, char * argv[]){
 				}
 				
 			}
-			diff_time = clock() - start;
-			msec = diff_time * 1000 / CLOCKS_PER_SEC;
-
-			printf("Tempo impiegato: %d millisecondi\n", msec%1000);
-
 			shutdown(newSocket, 0);
 			shutdown(newSocket, 1);
 			printf("Server TCP: Letto il file e cancellata la riga\n\n");
